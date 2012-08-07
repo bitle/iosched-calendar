@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.mobeplace.android.ui.calendarview.MainActivity"
+            android:name=".activity.MainActivity"
             android:label="Main Activity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
