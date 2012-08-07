@@ -17,6 +17,8 @@
 package com.google.android.apps.iosched.ui;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
@@ -28,6 +30,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -47,6 +50,8 @@ import com.google.android.apps.iosched.util.UIUtils;
 
 public class ScheduleFragment extends Fragment implements ObservableScrollView.OnScrollListener, View.OnClickListener {
 	private static final String TAG = "ScheduleFragment";
+	public static final String START_DATE = "start_date";
+	public static final String END_DATE = "end_date";
 	
 	/**
      * Flags used with {@link android.text.format.DateUtils#formatDateRange}.
@@ -168,8 +173,38 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
     }
 	
 	private void setupDays(LayoutInflater inflater) {
-    	setupDay(inflater, TUE_START);
-        setupDay(inflater, WED_START);
+		long startDate = getArguments().getLong(START_DATE, -1);
+		long endDate = getArguments().getLong(END_DATE, -1);
+		
+		if (startDate < 0 || endDate < 0) {
+			throw new IllegalArgumentException("Start and End dates must be provided");
+		}
+		
+		if (startDate > endDate) {
+			throw new IllegalArgumentException("End date must be later than start date");
+		}
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(startDate);
+		calendar.clear(Calendar.HOUR);
+		calendar.clear(Calendar.MINUTE);
+		calendar.clear(Calendar.SECOND);
+		calendar.clear(Calendar.MILLISECOND);
+		startDate = calendar.getTimeInMillis();
+		
+		calendar.setTimeInMillis(endDate);
+		calendar.clear(Calendar.HOUR);
+		calendar.clear(Calendar.MINUTE);
+		calendar.clear(Calendar.SECOND);
+		calendar.clear(Calendar.MILLISECOND);
+		endDate = calendar.getTimeInMillis();
+		
+		Log.d(TAG, "Start date: " + new Date(startDate));
+		Log.d(TAG, "End date: " + new Date(endDate));
+		
+		for (long currentDay = startDate; currentDay <= endDate; currentDay += DateUtils.DAY_IN_MILLIS) {
+			setupDay(inflater, currentDay);
+		}
 	}
     
     private void setupDay(LayoutInflater inflater, long startMillis) {
