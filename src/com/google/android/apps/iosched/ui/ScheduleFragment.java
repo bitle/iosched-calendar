@@ -140,8 +140,7 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
             }
         });
 
-        setupDay(inflater, TUE_START);
-        setupDay(inflater, WED_START);
+        setupDays(inflater);
 
         updateWorkspaceHeader(0);
         mWorkspace.setOnScrollListener(new Workspace.OnScrollListener() {
@@ -152,8 +151,8 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
 
         return root;
     }
-    
-    public void updateWorkspaceHeader(int dayIndex) {
+
+	public void updateWorkspaceHeader(int dayIndex) {
         if (mTitleCurrentDayIndex == dayIndex) {
             return;
         }
@@ -167,6 +166,11 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
         mRightIndicator
                 .setVisibility((dayIndex < mDays.size() - 1) ? View.VISIBLE : View.INVISIBLE);
     }
+	
+	private void setupDays(LayoutInflater inflater) {
+    	setupDay(inflater, TUE_START);
+        setupDay(inflater, WED_START);
+	}
     
     private void setupDay(LayoutInflater inflater, long startMillis) {
         Day day = new Day();
