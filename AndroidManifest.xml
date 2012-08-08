@@ -23,7 +23,7 @@
         
         <provider
             android:name=".provider.ExampleScheduleProvider"
-            android:authorities="com.google.android.apps.iosched"
+            android:authorities="com.google.android.apps.iosched.calendar"
             android:exported="false" />
 
     </application>

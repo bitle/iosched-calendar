@@ -63,7 +63,7 @@ public class ScheduleContract {
         String BLOCK_TYPE = "block_type";
     }
 
-    public static final String CONTENT_AUTHORITY = "com.google.android.apps.iosched";
+    public static final String CONTENT_AUTHORITY = "com.google.android.apps.iosched.calendar";
 
     private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
@@ -137,4 +137,5 @@ public class ScheduleContract {
 
     private ScheduleContract() {
     }
+
 }
