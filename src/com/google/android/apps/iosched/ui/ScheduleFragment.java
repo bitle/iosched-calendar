@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
@@ -32,7 +30,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
@@ -259,7 +256,6 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
         filter.addAction(Intent.ACTION_TIME_TICK);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        getActivity().registerReceiver(mReceiver, filter, null, new Handler());
     }
     
     private void requery() {
@@ -381,14 +377,6 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
             }
         }
     }
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "onReceive time update");
-            updateNowView(false);
-        }
-    };
     
     private interface BlocksQuery {
         String[] PROJECTION = {
