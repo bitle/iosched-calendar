@@ -23,11 +23,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
+import android.database.Cursor;
 import android.graphics.Rect;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.BaseColumns;
 import android.support.v4.app.Fragment;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -45,10 +52,11 @@ import com.google.android.apps.iosched.ui.widget.ObservableScrollView;
 import com.google.android.apps.iosched.ui.widget.Workspace;
 import com.google.android.apps.iosched.util.Maps;
 import com.google.android.apps.iosched.util.MotionEventUtils;
+import com.google.android.apps.iosched.util.NotifyingAsyncQueryHandler;
 import com.google.android.apps.iosched.util.ParserUtils;
 import com.google.android.apps.iosched.util.UIUtils;
 
-public class ScheduleFragment extends Fragment implements ObservableScrollView.OnScrollListener, View.OnClickListener {
+public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHandler.AsyncQueryListener, ObservableScrollView.OnScrollListener, View.OnClickListener {
 	private static final String TAG = "ScheduleFragment";
 	public static final String START_DATE = "start_date";
 	public static final String END_DATE = "end_date";
@@ -58,9 +66,12 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
      */
     private static final int TIME_FLAGS = DateUtils.FORMAT_SHOW_DATE
             | DateUtils.FORMAT_SHOW_WEEKDAY | DateUtils.FORMAT_ABBREV_WEEKDAY;
-	
-	private static final long TUE_START = ParserUtils.parseTime("2011-05-10T00:00:00.000-07:00");
-    private static final long WED_START = ParserUtils.parseTime("2011-05-11T00:00:00.000-07:00");
+    
+    private static final int DISABLED_BLOCK_ALPHA = 100;
+    
+    private static final HashMap<String, Integer> sTypeColumnMap = buildTypeColumnMap();
+    
+    private NotifyingAsyncQueryHandler mHandler;
 	
 	private Workspace mWorkspace;
     private TextView mTitle;
@@ -97,8 +108,7 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // TODO:
-        //mHandler = new NotifyingAsyncQueryHandler(getActivity().getContentResolver(), this);
+        mHandler = new NotifyingAsyncQueryHandler(getActivity().getContentResolver(), this);
         setHasOptionsMenu(true);
     }
     
@@ -244,9 +254,8 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
         // need to manually requery every time launched.
         requery();
 
-        // TODO:
-//        getActivity().getContentResolver().registerContentObserver(
-//                ScheduleContract.Sessions.CONTENT_URI, true, mSessionChangesObserver);
+        getActivity().getContentResolver().registerContentObserver(
+                ScheduleContract.Sessions.CONTENT_URI, true, mSessionChangesObserver);
 
         // Start listening for time updates to adjust "now" bar. TIME_TICK is
         // triggered once per minute, which is how we move the bar over time.
@@ -254,15 +263,13 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
         filter.addAction(Intent.ACTION_TIME_TICK);
         filter.addAction(Intent.ACTION_TIME_CHANGED);
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-        // TODO:
-        //getActivity().registerReceiver(mReceiver, filter, null, new Handler());
+        getActivity().registerReceiver(mReceiver, filter, null, new Handler());
     }
     
     private void requery() {
         for (Day day : mDays) {
-        	// TODO:
-//            mHandler.startQuery(0, day, day.blocksUri, BlocksQuery.PROJECTION,
-//                    null, null, ScheduleContract.Blocks.DEFAULT_SORT);
+            mHandler.startQuery(0, day, day.blocksUri, BlocksQuery.PROJECTION,
+                    null, null, ScheduleContract.Blocks.DEFAULT_SORT);
         }
     }
     
@@ -279,9 +286,61 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
     @Override
     public void onPause() {
         super.onPause();
-        // TODO:
-//        getActivity().unregisterReceiver(mReceiver);
-//        getActivity().getContentResolver().unregisterContentObserver(mSessionChangesObserver);
+        getActivity().unregisterReceiver(mReceiver);
+        getActivity().getContentResolver().unregisterContentObserver(mSessionChangesObserver);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void onQueryComplete(int token, Object cookie, Cursor cursor) {
+        if (getActivity() == null) {
+            return;
+        }
+
+        Day day = (Day) cookie;
+
+        // Clear out any existing sessions before inserting again
+        day.blocksView.removeAllBlocks();
+        
+        if (cursor == null) {
+        	return;
+        }
+
+        try {
+            while (cursor.moveToNext()) {
+                final String type = cursor.getString(BlocksQuery.BLOCK_TYPE);
+                final Integer column = sTypeColumnMap.get(type);
+                // TODO: place random blocks at bottom of entire layout
+                if (column == null) {
+                    continue;
+                }
+
+                final String blockId = cursor.getString(BlocksQuery.BLOCK_ID);
+                final String title = cursor.getString(BlocksQuery.BLOCK_TITLE);
+                final long start = cursor.getLong(BlocksQuery.BLOCK_START);
+                final long end = cursor.getLong(BlocksQuery.BLOCK_END);
+                final boolean containsStarred = cursor.getInt(BlocksQuery.CONTAINS_STARRED) != 0;
+
+                final BlockView blockView = new BlockView(getActivity(), blockId, title, start, end,
+                        containsStarred, column);
+
+                final int sessionsCount = cursor.getInt(BlocksQuery.SESSIONS_COUNT);
+                if (sessionsCount > 0) {
+                    blockView.setOnClickListener(this);
+                } else {
+                    blockView.setFocusable(false);
+                    blockView.setEnabled(false);
+                    LayerDrawable buttonDrawable = (LayerDrawable) blockView.getBackground();
+                    buttonDrawable.getDrawable(0).setAlpha(DISABLED_BLOCK_ALPHA);
+                    buttonDrawable.getDrawable(2).setAlpha(DISABLED_BLOCK_ALPHA);
+                }
+
+                day.blocksView.addBlock(blockView);
+            }
+        } finally {
+            cursor.close();
+        }
     }
     
     /** {@inheritDoc} */
@@ -336,5 +395,42 @@ public class ScheduleFragment extends Fragment implements ObservableScrollView.O
                 day.scrollView.scrollTo(0, scrollY);
             }
         }
+    }
+    
+    private ContentObserver mSessionChangesObserver = new ContentObserver(new Handler()) {
+        @Override
+        public void onChange(boolean selfChange) {
+            requery();
+        }
+    };
+
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "onReceive time update");
+            updateNowView(false);
+        }
+    };
+    
+    private interface BlocksQuery {
+        String[] PROJECTION = {
+                BaseColumns._ID,
+                ScheduleContract.Blocks.BLOCK_ID,
+                ScheduleContract.Blocks.BLOCK_TITLE,
+                ScheduleContract.Blocks.BLOCK_START,
+                ScheduleContract.Blocks.BLOCK_END,
+                ScheduleContract.Blocks.BLOCK_TYPE,
+                ScheduleContract.Blocks.SESSIONS_COUNT,
+                ScheduleContract.Blocks.CONTAINS_STARRED,
+        };
+
+        int _ID = 0;
+        int BLOCK_ID = 1;
+        int BLOCK_TITLE = 2;
+        int BLOCK_START = 3;
+        int BLOCK_END = 4;
+        int BLOCK_TYPE = 5;
+        int SESSIONS_COUNT = 6;
+        int CONTAINS_STARRED = 7;
     }
 }
