@@ -27,7 +27,7 @@ import android.text.format.DateUtils;
 import java.util.List;
 
 /**
- * Contract class for interacting with {@link ScheduleProvider}. Unless
+ * Contract class for interacting with {@link ExampleScheduleProvider}. Unless
  * otherwise noted, all time-based fields are milliseconds since epoch and can
  * be compared against {@link System#currentTimeMillis()}.
  * <p>

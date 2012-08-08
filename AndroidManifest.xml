@@ -20,6 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <provider
+            android:name=".provider.ExampleScheduleProvider"
+            android:authorities="com.google.android.apps.iosched"
+            android:exported="false" />
+
     </application>
 
 </manifest>
