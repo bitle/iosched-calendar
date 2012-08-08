@@ -17,12 +17,15 @@
 package com.google.android.apps.iosched.provider;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import android.app.Activity;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -88,7 +91,7 @@ public class ExampleScheduleProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
-        if (LOGV) Log.v(TAG, "query(uri=" + uri + ", proj=" + Arrays.toString(projection) + ")");
+        Log.v(TAG, "query(uri=" + uri + ", proj=" + Arrays.toString(projection) + ")");
 
         final int match = sUriMatcher.match(uri);
         switch (match) {
@@ -97,7 +100,7 @@ public class ExampleScheduleProvider extends ContentProvider {
         	break;
         case BLOCKS_BETWEEN:
         	Log.v(TAG, "blocks_between");
-        	break;
+        	return createCursor(uri, projection);
         case BLOCKS_ID:
         	Log.v(TAG, "blocks_id");
         	break;
@@ -109,7 +112,40 @@ public class ExampleScheduleProvider extends ContentProvider {
         return null;
     }
     
-    @Override
+    private Cursor createCursor(Uri uri, String[] columns) {
+    	MatrixCursor cursor = new MatrixCursor(columns);
+    	
+    	final List<String> segments = uri.getPathSegments();
+    	final String startTime = segments.get(2);
+        
+        long start = Long.parseLong(startTime) + 1000*60*60*8;
+        long end = start + 1000*60*60*1;
+    	
+    	cursor.addRow(new Object[] {
+    			1, // _id : integer
+    			"101", // block_id : text
+    			"block1", // block_title : text
+    			start, // block_start : integer
+    			end, // block_end : integer
+    			"session", // block_type : text
+    			1, // sessions_count : int
+    			0, // contains_starred : int
+    	});
+    	
+    	cursor.addRow(new Object[] {
+    			2, // _id : integer
+    			"102", // block_id : text
+    			"block2", // block_title : text
+    			end + 1000*60*60, // block_start : integer
+    			end + 1000*60*60*2, // block_end : integer
+    			"session", // block_type : text
+    			1, // sessions_count : int
+    			0, // contains_starred : int
+    	});
+		return cursor;
+	}
+
+	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		// TODO Auto-generated method stub
 		return 0;
