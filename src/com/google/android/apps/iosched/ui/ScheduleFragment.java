@@ -27,7 +27,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.drawable.LayerDrawable;
@@ -254,9 +253,6 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
         // need to manually requery every time launched.
         requery();
 
-        getActivity().getContentResolver().registerContentObserver(
-                ScheduleContract.Sessions.CONTENT_URI, true, mSessionChangesObserver);
-
         // Start listening for time updates to adjust "now" bar. TIME_TICK is
         // triggered once per minute, which is how we move the bar over time.
         final IntentFilter filter = new IntentFilter();
@@ -286,8 +282,6 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(mReceiver);
-        getActivity().getContentResolver().unregisterContentObserver(mSessionChangesObserver);
     }
     
     /**
@@ -346,16 +340,7 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
     /** {@inheritDoc} */
     public void onClick(View view) {
         if (view instanceof BlockView) {
-            String title = ((BlockView)view).getText().toString();
-
-            final String blockId = ((BlockView) view).getBlockId();
-            final Uri sessionsUri = ScheduleContract.Blocks.buildSessionsUri(blockId);
-
-            // TODO:
-//            final Intent intent = new Intent(Intent.ACTION_VIEW, sessionsUri);
-//            intent.putExtra(SessionsFragment.EXTRA_SCHEDULE_TIME_STRING,
-//                    ((BlockView) view).getBlockTimeString());
-//            ((BaseActivity) getActivity()).openActivityOrFragment(intent);
+        	final String blockId = ((BlockView) view).getBlockId();
         }
     }
     
@@ -396,13 +381,6 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
             }
         }
     }
-    
-    private ContentObserver mSessionChangesObserver = new ContentObserver(new Handler()) {
-        @Override
-        public void onChange(boolean selfChange) {
-            requery();
-        }
-    };
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override

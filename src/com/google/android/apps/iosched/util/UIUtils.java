@@ -16,9 +16,10 @@
 
 package com.google.android.apps.iosched.util;
 
-import com.google.android.apps.iosched.R;
-import com.google.android.apps.iosched.provider.ScheduleContract.Blocks;
-import com.google.android.apps.iosched.provider.ScheduleContract.Rooms;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import android.content.Context;
 import android.content.Intent;
@@ -42,10 +43,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.StyleSpan;
 import android.widget.TextView;
 
-import java.util.Formatter;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
+import com.google.android.apps.iosched.R;
 
 /**
  * An assortment of UI helpers.

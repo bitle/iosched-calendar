@@ -17,7 +17,6 @@
 package com.google.android.apps.iosched.provider;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -30,7 +29,6 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.google.android.apps.iosched.provider.ScheduleContract.Blocks;
-import com.google.android.apps.iosched.provider.ScheduleContract.Sessions;
 
 /**
  * Provider that stores {@link ScheduleContract} data. Data is usually inserted
@@ -80,8 +78,6 @@ public class ExampleScheduleProvider extends ContentProvider {
                 return Blocks.CONTENT_TYPE;
             case BLOCKS_ID:
                 return Blocks.CONTENT_ITEM_TYPE;
-            case BLOCKS_ID_SESSIONS:
-                return Sessions.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
