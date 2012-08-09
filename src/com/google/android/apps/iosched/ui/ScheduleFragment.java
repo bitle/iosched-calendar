@@ -220,8 +220,7 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
         day.index = mDays.size();
         day.timeStart = startMillis;
         day.timeEnd = startMillis + DateUtils.DAY_IN_MILLIS;
-        day.blocksUri = ScheduleContract.Blocks.buildBlocksBetweenDirUri(
-                day.timeStart, day.timeEnd);
+        day.blocksUri = buildBlocksBetweenUri(day.timeStart, day.timeEnd);
 
         // Setup views
         day.rootView = (ViewGroup) inflater.inflate(R.layout.blocks_content, null);
@@ -240,6 +239,10 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
 
         mWorkspace.addView(day.rootView);
         mDays.add(day);
+    }
+    
+    protected Uri buildBlocksBetweenUri(long timeStart, long timeEnd) {
+    	return ScheduleContract.Blocks.buildBlocksBetweenDirUri(timeStart, timeEnd);
     }
     
     @Override
