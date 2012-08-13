@@ -299,6 +299,8 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
         if (cursor == null) {
         	return;
         }
+        
+        List<BlockView> blocks = new ArrayList<BlockView>();
 
         try {
             while (cursor.moveToNext()) {
@@ -329,11 +331,23 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
                     buttonDrawable.getDrawable(2).setAlpha(DISABLED_BLOCK_ALPHA);
                 }
 
+                arrangeBlocksIfOverlaps(blocks, blockView);
+                blocks.add(blockView);
                 day.blocksView.addBlock(blockView);
             }
         } finally {
             cursor.close();
         }
+    }
+    
+    private void arrangeBlocksIfOverlaps(List<BlockView> blocks, BlockView block) {
+    	for(BlockView bv : blocks) {
+    		if (bv.getStartTime() <= block.getStartTime() &&
+    				block.getStartTime() <= bv.getEndTime()) {
+    			block.setOverlapOrder(block.getOverlapOrder() + 1);
+    			Log.d(TAG, "block " + block.getText() + " overlaps " + bv.getText() + " New overlap Order: " + block.getOverlapOrder());
+    		}
+    	}
     }
     
     /** {@inheritDoc} */

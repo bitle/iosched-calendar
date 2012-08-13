@@ -16,6 +16,8 @@
 
 package com.google.android.apps.iosched.ui.widget;
 
+import java.nio.channels.OverlappingFileLockException;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -119,9 +121,8 @@ public class BlocksLayout extends ViewGroup {
                 final BlockView blockView = (BlockView) child;
                 final int top = rulerView.getTimeVerticalOffset(blockView.getStartTime());
                 final int bottom = rulerView.getTimeVerticalOffset(blockView.getEndTime());
-                final int left = headerWidth;
-                final int right = left + columnWidth*mColumns;
-                Log.d("mobe", "onLayout: blockView: {top: " + top + " bottom: " + bottom + " left: " + left + " right: " + right + "}");
+                final int left = headerWidth + columnWidth*blockView.getOverlapOrder();
+                final int right = left + columnWidth;
                 child.layout(left, top, right, bottom);
             }
         }

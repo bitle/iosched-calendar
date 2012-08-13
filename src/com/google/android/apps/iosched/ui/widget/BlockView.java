@@ -16,9 +16,7 @@
 
 package com.google.android.apps.iosched.ui.widget;
 
-import com.google.android.apps.iosched.R;
-import com.google.android.apps.iosched.provider.ScheduleContract.Blocks;
-import com.google.android.apps.iosched.util.UIUtils;
+import java.util.TimeZone;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -27,7 +25,9 @@ import android.graphics.drawable.LayerDrawable;
 import android.text.format.DateUtils;
 import android.widget.Button;
 
-import java.util.TimeZone;
+import com.google.android.apps.iosched.R;
+import com.google.android.apps.iosched.provider.ScheduleContract.Blocks;
+import com.google.android.apps.iosched.util.UIUtils;
 
 /**
  * Custom view that represents a {@link Blocks#BLOCK_ID} instance, including its
@@ -45,6 +45,7 @@ public class BlockView extends Button {
     private final long mEndTime;
     private final boolean mContainsStarred;
     private final int mColumn;
+    private int mOverlapOrder;
 
     public BlockView(Context context, String blockId, String title, long startTime,
             long endTime, boolean containsStarred, int column) {
@@ -103,4 +104,12 @@ public class BlockView extends Button {
     public int getColumn() {
         return mColumn;
     }
+
+	public void setOverlapOrder(int overlapOrder) {
+		this.mOverlapOrder = overlapOrder;
+	}
+
+	public int getOverlapOrder() {
+		return mOverlapOrder;
+	}
 }
