@@ -16,14 +16,15 @@
 
 package com.google.android.apps.iosched.ui.widget;
 
-import com.google.android.apps.iosched.R;
-import com.google.android.apps.iosched.util.UIUtils;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.google.android.apps.iosched.R;
+import com.google.android.apps.iosched.util.UIUtils;
 
 /**
  * Custom layout that contains and organizes a {@link TimeRulerView} and several
@@ -118,8 +119,9 @@ public class BlocksLayout extends ViewGroup {
                 final BlockView blockView = (BlockView) child;
                 final int top = rulerView.getTimeVerticalOffset(blockView.getStartTime());
                 final int bottom = rulerView.getTimeVerticalOffset(blockView.getEndTime());
-                final int left = headerWidth + (blockView.getColumn() * columnWidth);
-                final int right = left + columnWidth;
+                final int left = headerWidth;
+                final int right = left + columnWidth*mColumns;
+                Log.d("mobe", "onLayout: blockView: {top: " + top + " bottom: " + bottom + " left: " + left + " right: " + right + "}");
                 child.layout(left, top, right, bottom);
             }
         }
