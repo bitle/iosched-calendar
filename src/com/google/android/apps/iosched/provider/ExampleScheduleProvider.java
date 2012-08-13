@@ -114,7 +114,7 @@ public class ExampleScheduleProvider extends ContentProvider {
     	final List<String> segments = uri.getPathSegments();
     	final String startTime = segments.get(2);
         
-        long start = Long.parseLong(startTime) + 1000*60*60*8;
+        long start = Long.parseLong(startTime) + 1000*60*60*5;
         long end = start + 1000*60*60*1;
     	
     	cursor.addRow(new Object[] {
@@ -132,8 +132,19 @@ public class ExampleScheduleProvider extends ContentProvider {
     			2, // _id : integer
     			"102", // block_id : text
     			"block2", // block_title : text
-    			end + 1000*60*60, // block_start : integer
-    			end + 1000*60*60*2, // block_end : integer
+    			start + 1000*60*30, // block_start : integer
+    			end + 1000*60*30, // block_end : integer
+    			"session", // block_type : text
+    			1, // sessions_count : int
+    			0, // contains_starred : int
+    	});
+    	
+    	cursor.addRow(new Object[] {
+    			3, // _id : integer
+    			"102", // block_id : text
+    			"block3", // block_title : text
+    			start + 1000*60*30, // block_start : integer
+    			end + 1000*60*30, // block_end : integer
     			"session", // block_type : text
     			1, // sessions_count : int
     			0, // contains_starred : int
