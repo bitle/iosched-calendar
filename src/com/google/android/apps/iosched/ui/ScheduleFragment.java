@@ -186,12 +186,11 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
 			throw new IllegalArgumentException("Start and End dates must be provided");
 		}
 		
-		if (startDate > endDate) {
-			throw new IllegalArgumentException("End date must be later than start date");
-		}
+		
 		
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(startDate);
+		calendar.clear(Calendar.HOUR_OF_DAY);
 		calendar.clear(Calendar.HOUR);
 		calendar.clear(Calendar.MINUTE);
 		calendar.clear(Calendar.SECOND);
@@ -199,14 +198,19 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
 		startDate = calendar.getTimeInMillis();
 		
 		calendar.setTimeInMillis(endDate);
+		calendar.clear(Calendar.HOUR_OF_DAY);
 		calendar.clear(Calendar.HOUR);
 		calendar.clear(Calendar.MINUTE);
 		calendar.clear(Calendar.SECOND);
 		calendar.clear(Calendar.MILLISECOND);
 		endDate = calendar.getTimeInMillis();
-		
+
 		Log.d(TAG, "Start date: " + new Date(startDate));
 		Log.d(TAG, "End date: " + new Date(endDate));
+		
+		if (startDate > endDate) {
+			throw new IllegalArgumentException("End date must be later than start date");
+		}
 		
 		for (long currentDay = startDate; currentDay <= endDate; currentDay += DateUtils.DAY_IN_MILLIS) {
 			setupDay(inflater, currentDay);
