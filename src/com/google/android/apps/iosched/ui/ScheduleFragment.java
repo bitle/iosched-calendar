@@ -265,8 +265,9 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
         filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
     }
     
-    private void requery() {
+    protected void requery() {
         for (Day day : mDays) {
+        	day.blocksUri = buildBlocksBetweenUri(day.timeStart, day.timeEnd);
             mHandler.startQuery(0, day, day.blocksUri, BlocksQuery.PROJECTION,
                     null, null, ScheduleContract.Blocks.DEFAULT_SORT);
         }
@@ -349,7 +350,7 @@ public class ScheduleFragment extends Fragment implements NotifyingAsyncQueryHan
     		if (bv.getStartTime() <= block.getStartTime() &&
     				block.getStartTime() <= bv.getEndTime()) {
     			block.setOverlapOrder(block.getOverlapOrder() + 1);
-    			Log.d(TAG, "block " + block.getText() + " overlaps " + bv.getText() + " New overlap Order: " + block.getOverlapOrder());
+    			//Log.d(TAG, "block " + block.getText() + " overlaps " + bv.getText() + " New overlap Order: " + block.getOverlapOrder());
     		}
     	}
     }
